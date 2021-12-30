@@ -18,5 +18,11 @@
   "bugs": {
     "url": "https://github.com/rantemma/sirop/issues"
   },
-  "homepage": "https://github.com/rantemma/sirop#readme"
+  "homepage": "https://github.com/rantemma/sirop#readme",
+  "dependencies": {
+    "rale": "^0.0.9"
+  },
+  "devDependencies": {
+    "@types/node": "^17.0.5"
+  }
 }
