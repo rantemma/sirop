@@ -43,7 +43,7 @@ export type TokenName =
 "curly_bracket" | "bracket" | "parenthesis" | "angle_bracket" |
 "number" | "string" |
 "dot" | "semicolon" | "colon" | "dash" | "plus" | "equal" | "star" | "slash" | "anti_slash" |
-"question_mark" | "exclamation_mark" | "double_quote" | "single_quote" | "backtick";
+"question_mark" | "exclamation_mark" | "double_quote" | "single_quote" | "backtick" | "space";
 
 export interface Token extends _Token {
     name: TokenName,
