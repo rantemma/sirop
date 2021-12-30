@@ -1,2 +1,0 @@
-# sirop
-TypeScript parser
