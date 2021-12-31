@@ -33,15 +33,12 @@ export class Parser {
                 let matched: Token[] = [];
                 let skip = 0;
 
-                for (let m = 0; m < this.interrupts[int].expression.length; m++) {
+                for (let m = 0; m-skip < this.interrupts[int].expression.length && i+m < lexed.length; m++) {
 
                     if (lexed[i+m].name === "space") {
-                        if (this.interrupts[int].validate.removeSpace === true) {
-                            matched.push(lexed[i+m]);
-                        } else {
-                            skip++;
-                        }
-                    } if (this.interrupts[int].expression[m-skip].includes(lexed[i+m].name)) {
+                        matched.push(lexed[i+m]);
+                        skip++;
+                    } else if (this.interrupts[int].expression[m-skip].includes(lexed[i+m].name)) {
                         matched.push(lexed[i+m]);
                     } else {
                         break;
@@ -49,13 +46,15 @@ export class Parser {
 
                 }
 
-                if (matched.length > 0) {
+                if (matched.length-skip > 0) {
 
-                    const catchBy = this.interrupts[int].validate.on(matched);
+                    const catchBy = this.interrupts[int].validate.on(
+                        this.interrupts[int].validate.removeSpace === true ? matched.filter(v=>v.name!=="space") : matched
+                    );
 
                     if (catchBy === true) {
                         caught = true;
-                        i += matched.length + skip;
+                        i += matched.length;
                         break;
                     }
 
@@ -63,9 +62,11 @@ export class Parser {
 
             }
 
-            if (caught !== true) {
+            if (caught !== true && lexed[i].name !== "space") {
                 this.uncaughtCallbacks.forEach(v=>v(lexed[i]));
                 break;
+            } else if (caught !== true && lexed[i].name === "space") {
+                i++;
             }
 
         }
