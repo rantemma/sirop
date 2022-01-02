@@ -1,8 +1,9 @@
-import { Root, RootResolve, UncaughtCallback } from "./types";
+import { PreRoot, Root, RootResolve, UncaughtCallback } from "./types";
 
 import { lexer } from "../lexer";
 import { ExpressionWord } from "./expression";
 import { Token } from "rale";
+import { formatToExpr } from "..";
 
 export class Parser {
 
@@ -20,8 +21,11 @@ export class Parser {
         return this;
     }
 
-    public root(root: Root) {
-        this.roots.push(root);
+    public root(root: PreRoot) {
+        this.roots.push({
+            expression: typeof root.expression === "string" ? formatToExpr(root.expression) : root.expression,
+            validate: root.validate,
+        });
         return this;
     }
 
@@ -39,7 +43,7 @@ export class Parser {
 
         const lexed = lexer.parse(string);
 
-        for (let i = 0; i < lexed.length; i++) {
+        for (let i = 0; i < lexed.length;) {
 
             if (lexed[i].name !== "space") {
 
@@ -48,55 +52,109 @@ export class Parser {
                 for (let ri = 0; ri < this.roots.length; ri++) { // ri: Root Index
 
                     let matched: RootResolve = {};
-                    let match = true;
 
+                    word:
                     for (let wi = 0; wi < this.roots[ri].expression.length; wi++) { // wi: Word Index
 
-                        let find: Token[] = [];
+                        const currentWord = this.roots[ri].expression[wi];
 
-                        const cwrd = this.roots[ri].expression[wi]; // current word
+                        let word: Token[] = [];
+                        let lgth = 0;
 
-                        for (let cf = 0; cf < cwrd.figure.length && i < lexed.length; cf++) {
+                        for (let cf = 0; cf < currentWord.figure.length;) {
 
-                            const figure = cwrd.figure[cf];
+                            const currentFigure = currentWord.figure[cf];
 
-                            let found = 0;
-
-                            if (figure.names.includes(lexed[i].name)) {
-
-                                find.push(lexed[i]);
-
-                                
-
-                            } else if (figure.optional===false){
-
+                            if (lexed[i+lgth] == null) {
                                 break;
+                            }
 
+                            let cat = false;
+                            
+                            let total = "";
+
+                            let another = lgth;
+
+                            let cnt = lexed[i+another].content;
+
+                            while (cnt!=="|"&&cnt!==">"&&cnt!=="]"&&cnt!==" ") {
+
+                                total += cnt;
+
+                                another++;
+
+                                if (lexed[i+another]==null) break;
+
+                                cnt = lexed[i+another].content;
+
+                            }
+
+                            if (total != "") if (currentFigure.text.includes(total)) {
+                                const begin = lexed[i+lgth].begin;
+                                lgth=another;
+                                const end = lexed[i+lgth].end;
+                                word.push({
+                                    begin: begin,
+                                    end: end,
+                                    type: "long",
+                                    name: "unknown",
+                                    content: total,
+                                });
+                                cf++;
+                                cat = true;
+                            }
+                            
+                            if (cat===false) if (currentFigure.names.includes(lexed[i+lgth].name)) {
+                                word.push(lexed[i+lgth]);
+                                lgth++;
+                                cf++;
+                            } else if (lexed[i+lgth].name === "space") {
+                                lgth++;
+                            } else if (currentFigure.optional === false) {
+                                word = [];
+                                break;
+                            } else {
+                                cf++;
                             }
 
                         }
 
-                        if (find.length === 0 && cwrd.optional===false){
-                            match = false;
-                            break;
-                        } else {
-                            matched[cwrd.key] = find;
+                        if (word.length > 0) {
+                            matched[currentWord.key] = word;
+                            i += lgth;
                         }
 
                     }
 
-                    if (match === true) if (this.roots[ri].validate(matched) === true) {
+                    // is root resolve match to expression ?
+
+                    let valid = true;
+
+                    for (let ia = 0; ia < this.roots[ri].expression.length; ia++) {
+
+                        const v = this.roots[ri].expression[ia];
+
+                        if (matched[v.key]==null&&v.optional===false){
+                            valid = false;
+                            break;
+                        }
+
+                    }
+
+                    if (valid === true) if (this.roots[ri].validate(matched)===true){
                         caught = true;
                         break;
                     }
 
                 }
 
-                if (caught !== true && lexed[i].name !== "space") {
+                if (caught === false) {
                     this.uncaughtCallbacks.forEach(v=>v(lexed[i]));
                     break;
                 }
 
+            } else {
+                i++;
             }
 
         }
