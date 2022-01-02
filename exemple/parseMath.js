@@ -3,106 +3,58 @@ const { Parser } = require('../lib/')
 const mathParser = new Parser();
 
 mathParser.onUncaught((token) => {
-    console.log(`Invalid token`, token.content)
+    console.log(`Invalid token:`, token.content != null ? token.content : token.name)
 })
-
-const number = {
-    0: 0, 5: 5,
-    1: 1, 6: 6,          
-    2: 2, 7: 7,      
-    3: 3, 8: 8,
-    4: 4, 9: 9,     
-}
-
-function parseInteger(string){
-    if (typeof string !== "string") return NaN;
-    let res = 0;
-    let mul = 1;
-    for (let i = 1; i <= string.length; i++) {
-        if (i===1) {
-            if (string[0] === "+") {
-                i++;    
-            } else if (string[0] === "-") {
-                mul = -1;
-                i++;
-            }
-        }
-        if (number[string[i-1]]==null) return NaN;
-        res+=number[string[i-1]]*(10**(string.length-i));
-    }
-    return res*mul;
-}
 
 let stored = [];
 let operator = null;
 
 // inner
-mathParser.interrupt({
-    "expression": [ ["plus", "dash", "number"], ["number"] ],
-    "validate": {
-        "on": (matched) => {
-            if (matched[0].name === "number") {
-                if (operator !== null) {
-                    stored[stored.length-1] = [stored[stored.length-1], operator, parseInteger(matched[0].content) ]
-                    operator = null;
-                } else {
-                    stored.push(parseInteger(matched[0].content))
-                }
-                return true;               
-            } else if (matched.length === 2) {
-                if (matched[0].name !== "number") {
-                    if (operator !== null) {
-                        stored[stored.length-1] = [stored[stored.length-1], operator, parseInteger(matched[0].content + matched[1].content) ]
-                        operator = null;
-                    } else {
-                        stored.push(parseInteger(matched[0].content + matched[1].content))
-                    }
-                    return true;   
-                }
+mathParser.root({
+    "expression": "[sign:+|-] <number:<$number>[.][$number]>",
+    "validate": (matched)=>{
+        let number = "";
+        if (matched.sign!=null) number += matched.sign[0].content;
+        number += matched.number[0].content;
+        if (matched.number[1]!=null) {
+            if (matched.number[2] !== null) {
+                number += "." + matched.number[2].content;
+            } else {
+                return false;
             }
-            return false;
+        }
+        if (operator !== null) {
+            stored[stored.length-1] = [ stored[stored.length-1], operator, parseFloat(number) ]
+            operator = null;
+        } else {
+            stored.push(parseFloat(number))
+        }
+        return true;
 
-        },
-        "removeSpace": true,
     }
 })
 
 // mul & pow
-mathParser.interrupt({
-    "expression": [ ["star"], ["star"] ],
-    "validate": {
-        "on": (matched) => {
-            if (stored.length === 0 || operator !== null) {
-                return false;
-            }
-            if (matched.length === 1) {
-                operator = "mul";
-                return true;
-            } else if (matched.length === 2) {
-                operator = "pow";
-                return true;
-            }
-            return false;
-        },
-        "removeSpace": true,
+mathParser.root({
+    "expression": "<op:<*>[*]>",
+    "validate": (matched) => {
+        if (stored.length === 0 || operator !== null) return false;
+        if (matched.op[1]!=null) {
+            operator = "pow";
+        } else {
+            operator = "mul";
+        }
+        return true;
     }
 });
 
 // div
-mathParser.interrupt({
-    "expression": [ ["star"] ],
-    "validate": {
-        "on": (matched) => {
-            if (matched.length === 1) {
-                if (stored.length === 0 || operator !== null) {
-                    return false;
-                }
-                operator = "div";
-                return true;
-            }
-            return false;
-        },
-        "removeSpace": true,
+mathParser.root({
+    "expression": "<op:/>",
+    "validate": (matched) => {
+        if (stored.length === 0 || operator !== null) return false;
+        operator = "div";
+        return true;
     }
 });
 
@@ -129,6 +81,5 @@ function parseMath(str){
     return result;
 }
 
-console.log("25 * 150 - 1", parseMath("25 * 150 - 1"))
-
-console.log("10 ** 3", parseMath("10 ** 3"))
+console.log("25 * 150 - 1", "->", parseMath("25 * 150 - 1"))
+console.log("10 ** 3", "->", parseMath("10 ** 3"))
