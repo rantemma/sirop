@@ -1,14 +1,13 @@
-import { TokenName, Token } from "../lexer/types";
+import { Token } from "rale";
+import { ExpressionWord } from "./expression";
 
-export interface Interrupt {
+export interface RootResolve {
+    [key: string]: Token[]
+}
 
-    expression: TokenName[][],
-
-    validate: {
-        on: (matched: Token[]) => boolean,
-        removeSpace?: boolean,
-    },
-
+export interface Root {
+    expressionWord: ExpressionWord[],
+    validate: (matched: RootResolve) => boolean,
 }
 
 export type UncaughtCallback = (token: Token) => void;

@@ -1,11 +1,13 @@
-import { Interrupt, UncaughtCallback } from "./types";
+import { Root, RootResolve, UncaughtCallback } from "./types";
 
 import { lexer } from "../lexer";
-import { Token } from "../lexer/types";
+import { ExpressionWord } from "./expression";
+import { Token } from "rale";
 
 export class Parser {
 
-    private interrupts: Interrupt[] = [];
+    private roots: Root[] = [];
+
     private uncaughtCallbacks: UncaughtCallback[] = [];
 
     public onUncaught(callback: UncaughtCallback) {
@@ -16,57 +18,92 @@ export class Parser {
         this.uncaughtCallbacks = this.uncaughtCallbacks.filter(v=>v!==callback);
     }
 
-    public interrupt(interrupt: Interrupt): void {
-        this.interrupts.push(interrupt);
+    /**
+     * Add an expression to 
+     * @param root 
+     * @param priority Default priority is one
+     */
+    public root(root: Root, priority?: number): void {
+
+        this.roots.push(root);
+
+        // <name:string> <'='> !semicolon<def:any>
+        // <type:string> <name:string> <';'>
+        // bool type = true;
+        // type = false;
+
+        // <integer:number> ['.'] #<decimal:number>
+
+    }
+
+    public removeRoot(root: Root): void {
+        this.roots = this.roots.filter(v=>v!==root);
+    }
+
+    public removeExpression(expression: ExpressionWord[]): void {
+        this.roots = this.roots.filter(v=>v.expressionWord!==expression);
     }
 
     public run(string: string){
 
         const lexed = lexer.parse(string);
 
-        for (let i = 0; i < lexed.length;) {
+        for (let i = 0; i < lexed.length; i++) {
 
-            let caught = false;
+            if (lexed[i].name !== "space") {
 
-            for (let int = 0; int < this.interrupts.length; int++) {
+                let caught = false;
 
-                let matched: Token[] = [];
-                let skip = 0;
+                for (let ri = 0; ri < this.roots.length; ri++) { // ri: Root Index
 
-                for (let m = 0; m-skip < this.interrupts[int].expression.length && i+m < lexed.length; m++) {
+                    let matched: RootResolve = {};
+                    let match = true;
 
-                    if (lexed[i+m].name === "space") {
-                        matched.push(lexed[i+m]);
-                        skip++;
-                    } else if (this.interrupts[int].expression[m-skip].includes(lexed[i+m].name)) {
-                        matched.push(lexed[i+m]);
-                    } else {
-                        break;
+                    for (let wi = 0; wi < this.roots[ri].expressionWord.length; wi++) { // wi: Word Index
+
+                        let find: Token[] = [];
+
+                        const cwrd = this.roots[ri].expressionWord[wi]; // current word
+
+                        for (let cf = 0; cf < cwrd.figure.length; cf++) {
+
+                            const figure = cwrd.figure[cf];
+
+                            let found = 0;
+
+                            if (figure.names.includes(lexed[i].name)) {
+
+                                find.push(lexed[i]);
+
+                            } else if (figure.optional===false){
+
+                                break;
+                                
+                            }
+
+                        }
+
+                        if (find.length === 0 && cwrd.optional===false){
+                            match = false;
+                            break;
+                        } else {
+                            matched[cwrd.key] = find;
+                        }
+
                     }
 
-                }
-
-                if (matched.length-skip > 0) {
-
-                    const catchBy = this.interrupts[int].validate.on(
-                        this.interrupts[int].validate.removeSpace === true ? matched.filter(v=>v.name!=="space") : matched
-                    );
-
-                    if (catchBy === true) {
+                    if (match === true) if (this.roots[ri].validate(matched) === true) {
                         caught = true;
-                        i += matched.length;
                         break;
                     }
 
                 }
 
-            }
+                if (caught !== true && lexed[i].name !== "space") {
+                    this.uncaughtCallbacks.forEach(v=>v(lexed[i]));
+                    break;
+                }
 
-            if (caught !== true && lexed[i].name !== "space") {
-                this.uncaughtCallbacks.forEach(v=>v(lexed[i]));
-                break;
-            } else if (caught !== true && lexed[i].name === "space") {
-                i++;
             }
 
         }

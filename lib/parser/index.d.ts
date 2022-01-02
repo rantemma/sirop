@@ -1,9 +1,17 @@
-import { Interrupt, UncaughtCallback } from "./types";
+import { Root, UncaughtCallback } from "./types";
+import { ExpressionWord } from "./expression";
 export declare class Parser {
-    private interrupts;
+    private roots;
     private uncaughtCallbacks;
     onUncaught(callback: UncaughtCallback): void;
     offUncaught(callback: UncaughtCallback): void;
-    interrupt(interrupt: Interrupt): void;
+    /**
+     * Add an expression to
+     * @param root
+     * @param priority Default priority is one
+     */
+    root(root: Root, priority?: number): void;
+    removeRoot(root: Root): void;
+    removeExpression(expression: ExpressionWord[]): void;
     run(string: string): void;
 }
