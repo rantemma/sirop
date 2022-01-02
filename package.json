@@ -11,7 +11,7 @@
     "url": "git+https://github.com/rantemma/sirop.git"
   },
   "keywords": [
-    "parser"
+    "parser", "generator"
   ],
   "author": "YiraSan",
   "license": "GPL-3.0",
