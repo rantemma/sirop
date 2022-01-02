@@ -6,7 +6,7 @@ export interface RootResolve {
 }
 
 export interface Root {
-    expressionWord: ExpressionWord[],
+    expression: ExpressionWord[],
     validate: (matched: RootResolve) => boolean,
 }
 

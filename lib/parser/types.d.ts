@@ -4,7 +4,7 @@ export interface RootResolve {
     [key: string]: Token[];
 }
 export interface Root {
-    expressionWord: ExpressionWord[];
+    expression: ExpressionWord[];
     validate: (matched: RootResolve) => boolean;
 }
 export declare type UncaughtCallback = (token: Token) => void;

@@ -12,36 +12,27 @@ export class Parser {
 
     public onUncaught(callback: UncaughtCallback) {
         this.uncaughtCallbacks.push(callback);
+        return this;
     }
 
     public offUncaught(callback: UncaughtCallback) {
         this.uncaughtCallbacks = this.uncaughtCallbacks.filter(v=>v!==callback);
+        return this;
     }
 
-    /**
-     * Add an expression to 
-     * @param root 
-     * @param priority Default priority is one
-     */
-    public root(root: Root, priority?: number): void {
-
+    public root(root: Root) {
         this.roots.push(root);
-
-        // <name:string> <'='> !semicolon<def:any>
-        // <type:string> <name:string> <';'>
-        // bool type = true;
-        // type = false;
-
-        // <integer:number> ['.'] #<decimal:number>
-
+        return this;
     }
 
-    public removeRoot(root: Root): void {
+    public removeRoot(root: Root) {
         this.roots = this.roots.filter(v=>v!==root);
+        return this;
     }
 
-    public removeExpression(expression: ExpressionWord[]): void {
-        this.roots = this.roots.filter(v=>v.expressionWord!==expression);
+    public removeExpression(expression: ExpressionWord[]) {
+        this.roots = this.roots.filter(v=>v.expression!==expression);
+        return this;
     }
 
     public run(string: string){
@@ -59,13 +50,13 @@ export class Parser {
                     let matched: RootResolve = {};
                     let match = true;
 
-                    for (let wi = 0; wi < this.roots[ri].expressionWord.length; wi++) { // wi: Word Index
+                    for (let wi = 0; wi < this.roots[ri].expression.length; wi++) { // wi: Word Index
 
                         let find: Token[] = [];
 
-                        const cwrd = this.roots[ri].expressionWord[wi]; // current word
+                        const cwrd = this.roots[ri].expression[wi]; // current word
 
-                        for (let cf = 0; cf < cwrd.figure.length; cf++) {
+                        for (let cf = 0; cf < cwrd.figure.length && i < lexed.length; cf++) {
 
                             const figure = cwrd.figure[cf];
 
@@ -75,10 +66,12 @@ export class Parser {
 
                                 find.push(lexed[i]);
 
+                                
+
                             } else if (figure.optional===false){
 
                                 break;
-                                
+
                             }
 
                         }
@@ -107,6 +100,8 @@ export class Parser {
             }
 
         }
+
+        return this;
 
     }
 
