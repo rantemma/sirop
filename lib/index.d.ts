@@ -1,2 +1,3 @@
 import { Parser } from "./parser";
-export { Parser };
+import { formatToExpr } from "./parser/expression";
+export { Parser, formatToExpr };
