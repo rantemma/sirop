@@ -5,9 +5,13 @@ export interface RootResolve {
     [key: string]: Token[]
 }
 
-export interface Root {
-    expression: ExpressionWord[],
+export interface PreRoot {
+    expression: ExpressionWord[] | string,
     validate: (matched: RootResolve) => boolean,
+}
+
+export interface Root extends PreRoot {
+    expression: ExpressionWord[]
 }
 
 export type UncaughtCallback = (token: Token) => void;
