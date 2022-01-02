@@ -1,5 +1,6 @@
 export type Figure = {
     names: string[],
+    text: string[],
     optional: boolean,
 };
 
@@ -76,8 +77,9 @@ export function formatToExpr(string: string): ExpressionWord[] {
                 if (string[i] === ">" || string[i] === "]") return;
 
                 let figure: Figure = {
-                    names: [],
                     optional: false,
+                    names: [],
+                    text: [],
                 }
 
                 // Optional Begin Enclosure
@@ -96,18 +98,29 @@ export function formatToExpr(string: string): ExpressionWord[] {
                     enclosure = false;
                 }
 
-                let names = "";
+                // names or brut
+
+                let content = "";
 
                 while (string[i] !== "]" && string[i] !== ">") {
-                    names += string[i];
+                    content += string[i];
                     i++;
                 }
 
-                if (names === "") {
-                    throw "Invalid Figure Name";
+                if (content === "") {
+                    throw "Invalid Figure";
                 }
 
-                figure.names = names.split("|");
+                content.split("|").forEach(v=>{
+                    
+                    if (v.startsWith("$")) {
+                        figure.names.push(v.substring(1));
+                    } else {
+                        figure.text.push(v);
+                    }
+
+                })
+                
                 word.figure.push(figure);
 
                 // Optional End Enclosure

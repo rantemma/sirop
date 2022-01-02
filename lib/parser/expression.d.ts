@@ -1,5 +1,6 @@
 export declare type Figure = {
     names: string[];
+    text: string[];
     optional: boolean;
 };
 export declare type ExpressionWord = {
