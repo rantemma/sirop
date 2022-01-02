@@ -53,7 +53,6 @@ export class Parser {
 
                     let matched: RootResolve = {};
 
-                    word:
                     for (let wi = 0; wi < this.roots[ri].expression.length; wi++) { // wi: Word Index
 
                         const currentWord = this.roots[ri].expression[wi];
@@ -70,7 +69,7 @@ export class Parser {
                             }
 
                             let cat = false;
-                            
+
                             let total = "";
 
                             let another = lgth;
@@ -81,6 +80,22 @@ export class Parser {
 
                                 total += cnt;
 
+                                if (currentFigure.text.includes(total)) {
+                                    const begin = lexed[i+lgth].begin;
+                                    const end = lexed[i+another].end;
+                                    lgth=another+1;
+                                    word.push({
+                                        begin: begin,
+                                        end: end,
+                                        type: "long",
+                                        name: "unknown",
+                                        content: total,
+                                    });
+                                    cf++;
+                                    cat = true;
+                                    break;
+                                }
+
                                 another++;
 
                                 if (lexed[i+another]==null) break;
@@ -89,21 +104,6 @@ export class Parser {
 
                             }
 
-                            if (total != "") if (currentFigure.text.includes(total)) {
-                                const begin = lexed[i+lgth].begin;
-                                lgth=another;
-                                const end = lexed[i+lgth].end;
-                                word.push({
-                                    begin: begin,
-                                    end: end,
-                                    type: "long",
-                                    name: "unknown",
-                                    content: total,
-                                });
-                                cf++;
-                                cat = true;
-                            }
-                            
                             if (cat===false) if (currentFigure.names.includes(lexed[i+lgth].name)) {
                                 word.push(lexed[i+lgth]);
                                 lgth++;
@@ -125,7 +125,7 @@ export class Parser {
                         }
 
                     }
-
+                    
                     // is root resolve match to expression ?
 
                     let valid = true;
