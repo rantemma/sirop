@@ -81,5 +81,21 @@ function parseMath(str){
     return result;
 }
 
-console.log("25 * 150 - 1", "->", parseMath("25 * 150 - 1"))
-console.log("10 ** 3", "->", parseMath("10 ** 3"))
+let opp;
+
+opp = "10 ** 3 + 150 + 3700 * 4";
+parseMath(opp)
+console.time("time")
+parseMath(opp)
+console.timeEnd("time")
+console.log(opp, "->", parseMath(opp))
+console.log("From Eval ->", eval(opp), "\n", "\n")
+
+opp = "10 + 25 * 150 - 1";
+parseMath(opp)
+console.time("time")
+parseMath(opp)
+console.timeEnd("time")
+console.log(opp, "->", parseMath(opp))
+console.log("From Eval ->", eval(opp), "\n", "\n")
+
