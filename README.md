@@ -11,10 +11,8 @@ Sirop is a very simple to use framework to create any kind of parser in a few mi
 There is an exemple of [math parsing](https://github.com/rantemma/sirop/blob/main/exemple/parseMath.js) (can be optimized don't use it as wrote)
 
 That should print: 
-
 ```
-25 * 150 - 1 3749
-10 ** 3 1000
+25 * 150 - 1 -> 3749
+10 ** 3 -> 1000
 ```
 
-Enjoy :)
