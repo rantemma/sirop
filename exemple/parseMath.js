@@ -97,5 +97,5 @@ console.time("time")
 parseMath(opp)
 console.timeEnd("time")
 console.log(opp, "->", parseMath(opp))
-console.log("From Eval ->", eval(opp), "\n", "\n")
+console.log("From Eval ->", eval(opp))
 
