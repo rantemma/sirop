@@ -222,5 +222,3 @@ export function formatToExpr(string: string): ExpressionWord[] {
     return words;
 
 }
-
-console.log(formatToExpr("<import:import> <name:$string^;>")[1])
