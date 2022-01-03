@@ -7,10 +7,7 @@ export declare type ExpressionWord = {
     key: string;
     optional: boolean;
     belongsToLast: boolean;
-    until?: {
-        text: string[];
-        names: string[];
-    };
+    until?: string[];
     figure: Figure[];
 };
 export declare function formatToExpr(string: string): ExpressionWord[];

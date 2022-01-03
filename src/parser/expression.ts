@@ -8,10 +8,7 @@ export type ExpressionWord = {
     key: string,
     optional: boolean,
     belongsToLast: boolean,
-    until?: {
-        text: string[],
-        names: string[],
-    },
+    until?: string[],
     figure: Figure[],
 };
 
@@ -162,22 +159,7 @@ export function formatToExpr(string: string): ExpressionWord[] {
                     throw "Invalid Figure";
                 }
 
-                word.until = {
-                    names: [],
-                    text: []
-                };
-
-                content.split("|").forEach(v=>{
-                    
-                    if (word.until)
-
-                    if (v.startsWith("$")) {
-                        word.until.names.push(v.substring(1));
-                    } else {
-                        word.until.text.push(v);
-                    }
-
-                })
+                word.until = content.split("|");
 
             }
 
