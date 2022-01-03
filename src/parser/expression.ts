@@ -8,6 +8,10 @@ export type ExpressionWord = {
     key: string,
     optional: boolean,
     belongsToLast: boolean,
+    until?: {
+        text: string[],
+        names: string[],
+    },
     figure: Figure[],
 };
 
@@ -57,7 +61,7 @@ export function formatToExpr(string: string): ExpressionWord[] {
 
             let key = "";
 
-            while (string[i]!==":"&&string[i]!==">"&&string[i]!=="]") {
+            while (string[i]!==":"&&string[i]!=="^"&&string[i]!==">"&&string[i]!=="]") {
                 key += string[i];
                 i++;
             }
@@ -74,7 +78,7 @@ export function formatToExpr(string: string): ExpressionWord[] {
 
                 i++;
 
-                if (string[i] === ">" || string[i] === "]") return;
+                if (string[i] === ">" || string[i] === "]" || string[i] === "^") return;
 
                 let figure: Figure = {
                     optional: false,
@@ -102,7 +106,7 @@ export function formatToExpr(string: string): ExpressionWord[] {
 
                 let content = "";
 
-                while (string[i] !== "]" && string[i] !== ">") {
+                while (string[i] !== "]" && string[i] !== ">" && string[i] !== "^") {
                     content += string[i];
                     i++;
                 }
@@ -139,7 +143,43 @@ export function formatToExpr(string: string): ExpressionWord[] {
 
             }
 
-            parseFigure();
+            if (string[i] !== "^") {
+                parseFigure();
+            }
+
+            if (string[i] === "^") {
+
+                i++;
+
+                let content = "";
+
+                while (string[i] !== "]" && string[i] !== ">") {
+                    content += string[i];
+                    i++;
+                }
+
+                if (content === "") {
+                    throw "Invalid Figure";
+                }
+
+                word.until = {
+                    names: [],
+                    text: []
+                };
+
+                content.split("|").forEach(v=>{
+                    
+                    if (word.until)
+
+                    if (v.startsWith("$")) {
+                        word.until.names.push(v.substring(1));
+                    } else {
+                        word.until.text.push(v);
+                    }
+
+                })
+
+            }
 
             // End Enclosure
 
@@ -182,3 +222,5 @@ export function formatToExpr(string: string): ExpressionWord[] {
     return words;
 
 }
+
+console.log(formatToExpr("<import:import> <name:$string^;>")[1])
