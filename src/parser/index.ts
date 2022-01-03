@@ -39,9 +39,9 @@ export class Parser {
         return this;
     }
 
-    public run(string: string){
+    public run(ins: string | Token[]){
 
-        const lexed = lexer.parse(string);
+        const lexed = typeof ins === "string" ? lexer.parse(ins) : ins;
 
         for (let i = 0; i < lexed.length;) {
 
