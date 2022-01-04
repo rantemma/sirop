@@ -121,20 +121,14 @@ export class Parser {
 
                         if (lexed[i+lgth] != null) if (currentWord.until != null) {
 
-                            let cat = false;
-
                             while (!currentWord.until.includes(lexed[i+lgth].name)) {
                                 word.push(lexed[i+lgth]);
                                 lgth++;
-                                cat = true;
                                 if (lexed[i+lgth] == null) {
-                                    cat = false;
                                     word = [];
                                     break;
                                 }
                             }
-
-                            if (cat===true) lgth++;
 
                         }
 
