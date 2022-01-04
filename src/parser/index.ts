@@ -130,6 +130,8 @@ export class Parser {
                                 }
                             }
 
+                            lgth+=currentWord.figure.length;
+
                         }
 
                         if (word.length > 0) {
