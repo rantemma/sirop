@@ -1,16 +1,16 @@
-export type Figure = {
+export interface Figure {
     names: string[],
     text: string[],
     optional: boolean,
-};
+}
 
-export type ExpressionWord = {
+export interface ExpressionWord {
     key: string,
     optional: boolean,
     belongsToLast: boolean,
     until?: string[],
     figure: Figure[],
-};
+}
 
 export function formatToExpr(string: string): ExpressionWord[] {
 
@@ -64,7 +64,11 @@ export function formatToExpr(string: string): ExpressionWord[] {
             }
 
             if (string[i]===">"||string[i]==="]"){
-                throw `${key} is implicitely any`
+                word.figure = [{
+                    "optional": false,
+                    "text": [key],
+                    "names": [],
+                }];
             }
 
             word.key = key;
@@ -140,7 +144,7 @@ export function formatToExpr(string: string): ExpressionWord[] {
 
             }
 
-            if (string[i] !== "^") {
+            if (string[i] !== "^" && string[i] !== ">" && string[i] !== "]") {
                 parseFigure();
             }
 

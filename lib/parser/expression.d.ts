@@ -1,13 +1,13 @@
-export declare type Figure = {
+export interface Figure {
     names: string[];
     text: string[];
     optional: boolean;
-};
-export declare type ExpressionWord = {
+}
+export interface ExpressionWord {
     key: string;
     optional: boolean;
     belongsToLast: boolean;
     until?: string[];
     figure: Figure[];
-};
+}
 export declare function formatToExpr(string: string): ExpressionWord[];
