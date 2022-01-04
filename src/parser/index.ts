@@ -134,7 +134,7 @@ export class Parser {
 
                         if (word.length > 0) {
                             matched[currentWord.key] = word;
-                            i += lgth+1;
+                            i += lgth;
                         }
 
                     }
