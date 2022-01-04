@@ -167,7 +167,7 @@ export class Parser {
 
                 }
 
-                if (caught === false) {
+                if (caught === false && lexed[i]!=null) {
                     this.uncaughtCallbacks.forEach(v=>v(lexed[i]));
                     break;
                 }
