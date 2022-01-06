@@ -1,6 +1,6 @@
 {
   "name": "sirop",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "A powerful and simple parser framework",
   "main": "lib/index.js",
   "scripts": {
