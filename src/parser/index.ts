@@ -39,6 +39,119 @@ export class Parser {
         return this;
     }
 
+    public parse(entry: string | Token[]): this {
+
+        if (typeof entry === "string") entry = lexer.parse(entry);
+        if (entry.length === 0) return this;
+
+        // entry pos
+        let epos = 0; 
+
+        // skip space token
+        while (entry[epos].name === "space") {
+            epos++;
+        }
+
+        // check for a valid root
+        for (let i = 0; i < this.roots.length; i++) {
+
+            // resolved word
+            let resolve: RootResolve = {};
+
+            // if expression are matching
+            let match = false;
+
+            // abstract index/position
+            let abstract = epos;
+
+            for (let w = 0; w < this.roots[i].expression.length; w++) {
+
+                const word = this.roots[i].expression[w];
+
+                // figure found for this word
+                let found: Token[] = [];
+
+                // if word is valid
+                let valid = false;
+
+                aloop:
+                for (let f = 0; f < word.figure.length; f++) {
+
+                    if (entry[abstract] == null) {
+                        break;
+                    }
+
+                    while (entry[abstract].name === "space") {
+                        abstract++;
+                        if (entry[abstract] == null) {
+                            break aloop;
+                        }
+                    }
+
+                    let ati = abstract;
+                    let ats = "";
+
+                    while (!word.figure[f].text.includes(ats)) {
+
+                        if (entry[ati]==null) { break; }
+                        if (entry[ati].content==null) { break; }
+
+                        ats+=entry[ati].content;
+                        ati++;
+
+                    }
+
+                    let vf = false;
+
+                    if (word.figure[f].text.includes(ats)) {
+                        found.push({
+                            begin: entry[abstract].begin,
+                            end: entry[ati-1].end,
+                            type: "long",
+                            name: "unknown",
+                            content: ats,
+                        });
+                        abstract = ati;
+                        vf = true;
+                    } else if (word.figure[f].names.includes(entry[abstract].name)) {
+                        found.push(entry[abstract]);
+                        vf = true;
+                    } else if (word.figure[f].optional === false) {
+                        break;
+                    }
+
+                    if (word.figure.length-1 === f && vf === true) valid = true;
+
+                }
+
+                if (valid === false && word.optional === false) {
+                    break;
+                } else {
+                    resolve[word.key] = found;
+                }
+
+                if (w === this.roots[i].expression.length-1) {
+                    match = true;
+                }
+
+            }
+            
+            if (match === true) {
+                console.log("eee")
+                return this.parse(entry.slice(abstract));
+            }
+
+        }
+
+        console.log('[Unstable::Sirop] A token is uncaught. Error & Recover option aren\'t implemented');
+
+        return this;
+
+    }
+
+    /**
+     * @deprecated Until expression are unstable.
+     */
     public run(ins: string | Token[]){
 
         const lexed = typeof ins === "string" ? lexer.parse(ins) : ins;
@@ -119,7 +232,7 @@ export class Parser {
 
                         }
 
-                        if (lexed[i+lgth] != null) if (currentWord.until != null) {
+                        if (lexed[i+lgth] != null) if (currentWord.until != null) if (currentWord.until.length > 0) {
 
                             while (!currentWord.until.includes(lexed[i+lgth].name)) {
                                 word.push(lexed[i+lgth]);
@@ -131,6 +244,7 @@ export class Parser {
                             }
 
                             lgth+=currentWord.figure.length;
+                            
 
                         }
 
@@ -179,3 +293,10 @@ export class Parser {
     }
 
 }
+
+new Parser().root({
+    expression: "<import> <a:$string> <:> <b:$string> <;>",
+    validate: (matched) => {
+        return true;
+    }
+}).parse("import aaa:aaa;")

@@ -9,5 +9,9 @@ export declare class Parser {
     root(root: PreRoot): this;
     removeRoot(root: Root): this;
     removeExpression(expression: ExpressionWord[]): this;
+    parse(entry: string | Token[]): this;
+    /**
+     * @deprecated Until expression are unstable.
+     */
     run(ins: string | Token[]): this;
 }
