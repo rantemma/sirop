@@ -141,11 +141,51 @@ export class Parser {
 
                 }
 
-                if (valid === false && word.optional === false) {
+                // Until Expression
+
+                let untilValid = true;
+
+                if (word.until != null) if (word.until.length > 0 && (valid === true || word.figure.length === 0)) {
+                    
+                    if (entry[abstract]==null) {
+                
+                        untilValid = false;
+
+                    } else {
+
+                        while (!word.until.includes(entry[abstract].name)) {
+
+                            found.push(entry[abstract]);
+    
+                            abstract++;
+    
+                            if (entry[abstract] == null) {
+                                untilValid = false;
+                                break;
+                            }
+    
+                        }
+
+                        if (entry[abstract] != null) {
+                            found.push(entry[abstract]);
+                            abstract++;
+                        }
+
+                    }
+
+                }
+
+                // Check if figure is valid
+
+                if (untilValid === false && word.optional === true) {
+
+                } else if ((valid === false||untilValid === false) && word.optional === false) {
                     break;
                 } else if (found.length > 0) {
                     resolved[word.key] = found;
                 }
+
+                // Check if word match expression description
 
                 if (w === this.roots[i].expression.length-1) {
                     match = true;
@@ -161,7 +201,7 @@ export class Parser {
         }
 
         this.uncaughtCallbacks.forEach(v=>typeof entry !== "string"?v(entry[epos]):null);
-        
+
         return this;
 
     }
@@ -311,12 +351,13 @@ export class Parser {
 
 }
 
-const expr = formatToExpr("<import> [cl::] #[lol:$string]")
-
-new Parser().root({
-    expression: expr,
+new Parser()
+.root({
+    expression: "<import> <test:$string^semicolon>",
     validate: (resolved) => {
         console.log(resolved)
         return true;
     }
-}).parse("import : hey")
+})
+.onUncaught((token)=>console.log("Uncaught Token:", token))
+.parse("import a ;")
