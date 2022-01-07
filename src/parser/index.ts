@@ -162,8 +162,6 @@ export class Parser {
 
         this.uncaughtCallbacks.forEach(v=>typeof entry !== "string"?v(entry[epos]):null);
         
-        console.log('[Unstable::Sirop] A token is uncaught. Error & Recover option aren\'t implemented');
-
         return this;
 
     }
