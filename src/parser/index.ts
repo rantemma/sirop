@@ -1,4 +1,4 @@
-import { PreRoot, Root, RootResolve, UncaughtCallback } from "./types";
+import { PreRoot, Root, Resolve, UncaughtCallback } from "./types";
 
 import { lexer } from "../lexer";
 import { ExpressionWord } from "./expression";
@@ -56,17 +56,41 @@ export class Parser {
         for (let i = 0; i < this.roots.length; i++) {
 
             // resolved word
-            let resolve: RootResolve = {};
+            let resolved: Resolve = {};
 
             // if expression are matching
             let match = false;
 
             // abstract index/position
-            let abstract = epos;
+            let abstract = epos+0;
 
             for (let w = 0; w < this.roots[i].expression.length; w++) {
 
                 const word = this.roots[i].expression[w];
+                
+                if (entry[abstract] == null) {
+                    if (word.optional === true && this.roots[i].expression.slice(w).filter(v=>v.optional===false).length === 0) {
+                        match = true;
+                    }
+                    break;
+                }
+
+                while (entry[abstract].name === "space") {
+                    abstract++;
+                    if (entry[abstract] == null) {
+                        if (word.optional === true && this.roots[i].expression.slice(w).filter(v=>v.optional===false).length === 0) {
+                            match = true;
+                        }
+                        break;
+                    }
+                }
+
+                if (this.roots[i].expression[w-1]!=null) if (word.belongsToLast === true && resolved[this.roots[i].expression[w-1].key]==null) {
+                    if (w === this.roots[i].expression.length-1 && word.optional === true && this.roots[i].expression.slice(w).filter(v=>v.optional===false).length === 0) {
+                        match = true;
+                    }
+                    continue;
+                }
 
                 // figure found for this word
                 let found: Token[] = [];
@@ -74,21 +98,13 @@ export class Parser {
                 // if word is valid
                 let valid = false;
 
-                aloop:
                 for (let f = 0; f < word.figure.length; f++) {
 
                     if (entry[abstract] == null) {
                         break;
                     }
 
-                    while (entry[abstract].name === "space") {
-                        abstract++;
-                        if (entry[abstract] == null) {
-                            break aloop;
-                        }
-                    }
-
-                    let ati = abstract;
+                    let ati = abstract+0;
                     let ats = "";
 
                     while (!word.figure[f].text.includes(ats)) {
@@ -115,6 +131,7 @@ export class Parser {
                         vf = true;
                     } else if (word.figure[f].names.includes(entry[abstract].name)) {
                         found.push(entry[abstract]);
+                        abstract++;
                         vf = true;
                     } else if (word.figure[f].optional === false) {
                         break;
@@ -126,8 +143,8 @@ export class Parser {
 
                 if (valid === false && word.optional === false) {
                     break;
-                } else {
-                    resolve[word.key] = found;
+                } else if (found.length > 0) {
+                    resolved[word.key] = found;
                 }
 
                 if (w === this.roots[i].expression.length-1) {
@@ -135,9 +152,9 @@ export class Parser {
                 }
 
             }
-            
+
             if (match === true) {
-                console.log("eee")
+                this.roots[i].validate(resolved);
                 return this.parse(entry.slice(abstract));
             }
 
@@ -164,7 +181,7 @@ export class Parser {
 
                 for (let ri = 0; ri < this.roots.length; ri++) { // ri: Root Index
 
-                    let matched: RootResolve = {};
+                    let matched: Resolve = {};
 
                     for (let wi = 0; wi < this.roots[ri].expression.length; wi++) { // wi: Word Index
 
@@ -294,9 +311,12 @@ export class Parser {
 
 }
 
+const expr = formatToExpr("<import> [cl::] #[lol:$string]")
+
 new Parser().root({
-    expression: "<import> <a:$string> <:> <b:$string> <;>",
-    validate: (matched) => {
+    expression: expr,
+    validate: (resolved) => {
+        console.log(resolved)
         return true;
     }
-}).parse("import aaa:aaa;")
+}).parse("import : hey")
