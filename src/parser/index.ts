@@ -146,7 +146,7 @@ export class Parser {
                 let untilValid = true;
 
                 if (word.until != null) if (word.until.length > 0 && (valid === true || word.figure.length === 0)) {
-                    
+
                     if (entry[abstract]==null) {
                 
                         untilValid = false;
@@ -179,7 +179,7 @@ export class Parser {
 
                 if (untilValid === false && word.optional === true) {
 
-                } else if ((valid === false||untilValid === false) && word.optional === false) {
+                } else if (valid === false && word.figure.length !== 0 && untilValid === false && word.optional === false) {
                     break;
                 } else if (found.length > 0) {
                     resolved[word.key] = found;
@@ -353,11 +353,11 @@ export class Parser {
 
 new Parser()
 .root({
-    expression: "<import> <test:$string^semicolon>",
+    expression: "<import> <test^semicolon> <test2:$string^semicolon>",
     validate: (resolved) => {
         console.log(resolved)
         return true;
     }
 })
 .onUncaught((token)=>console.log("Uncaught Token:", token))
-.parse("import a ;")
+.parse("import a ;a ;")
