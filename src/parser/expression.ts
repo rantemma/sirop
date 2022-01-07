@@ -73,6 +73,10 @@ export function formatToExpr(string: string): ExpressionWord[] {
 
             word.key = key;
 
+            if (word.key === "") {
+                throw "Missing key"
+            }
+
             // Figure
 
             function parseFigure(){
