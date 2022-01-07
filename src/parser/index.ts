@@ -166,9 +166,10 @@ export class Parser {
     
                         }
 
-                        if (entry[abstract] != null) {
-                            found.push(entry[abstract]);
+                        if (untilValid === true) {
                             abstract++;
+                        } else {
+                            found = [];
                         }
 
                     }
@@ -187,15 +188,16 @@ export class Parser {
 
                 // Check if word match expression description
 
-                if (w === this.roots[i].expression.length-1) {
+                if (w === this.roots[i].expression.length-1 && (valid === true||word.figure.length === 0) && untilValid === true) {
+                    
                     match = true;
                 }
 
             }
 
             if (match === true) {
-                this.roots[i].validate(resolved);
-                return this.parse(entry.slice(abstract));
+                if (this.roots[i].validate(resolved)===true)
+                    return this.parse(entry.slice(abstract));
             }
 
         }
