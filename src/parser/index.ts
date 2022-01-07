@@ -167,6 +167,7 @@ export class Parser {
                         }
 
                         if (untilValid === true) {
+                            found.push(entry[abstract]);
                             abstract++;
                         } else {
                             found = [];
