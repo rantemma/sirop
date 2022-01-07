@@ -8,7 +8,7 @@
 
 Sirop is a very simple to use framework to create any kind of parser in a few minutes.
 
-## A basic exemple
+## Getting Started
 
 Expression are made of words which contains figure.
 
@@ -25,6 +25,28 @@ But here I'm obligate to add a sign to my number, so let's turn 'sign' key to op
 `[sign:+|-] <num:$number>`
 
 So there is my expression to parse integer.
+
+Now, I can create a parser:
+
+```ts
+import { Parser } from "sirop";
+
+const intParser = new Parser();
+
+intParser.root({
+    expression: "[sign:+|-] <num:$number>",
+    validate: resolved => {
+
+      console.log(resolved.sign)
+      console.log(resolved.num)
+
+      // by returning false the parser will stop his process.
+      return true;
+
+    }
+})
+
+``` 
 
 ## Multiple Figure Word
 
