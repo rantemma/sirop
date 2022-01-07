@@ -350,14 +350,3 @@ export class Parser {
     }
 
 }
-
-new Parser()
-.root({
-    expression: "<import> <test^semicolon> <test2:$string^semicolon>",
-    validate: (resolved) => {
-        console.log(resolved)
-        return true;
-    }
-})
-.onUncaught((token)=>console.log("Uncaught Token:", token))
-.parse("import a ;a ;")
